@@ -1,0 +1,13 @@
+Name:                bar
+Version:             0.1
+License:             BSD3
+License-file:        LICENSE
+Author:              Michael Snoyman
+Maintainer:          michael@snoyman.com
+Category:            Distribution
+Build-type:          Simple
+Cabal-version:       >=1.2
+
+Library
+  Exposed-modules:     Bar
+  Build-depends:       base, text >= 0.10 && < 0.11
