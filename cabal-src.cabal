@@ -1,0 +1,20 @@
+Name:                cabal-src
+Version:             0.1
+Synopsis:            Install source tarballs
+Description:         Install source tarballs
+License:             BSD3
+License-file:        LICENSE
+Author:              Michael Snoyman
+Maintainer:          michael@snoyman.com
+Category:            Distribution
+Build-type:          Simple
+Cabal-version:       >=1.2
+
+
+Executable cabal-src-install
+  Main-is:             cabal-src-install.hs
+  Build-depends:       base          >= 4 &&        < 5
+                     , bytestring
+                     , tar
+                     , directory
+                     , process
