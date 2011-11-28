@@ -1,14 +1,15 @@
 Name:                cabal-src
 Version:             0.1
-Synopsis:            Install source tarballs
-Description:         Install source tarballs
+Synopsis:            Alternative install procedure to avoid the diamond dependency issue.
+Description:         Please see the README.md file on Github for more information: <https://github.com/yesodweb/cabal-src/blob/master/README.md>.
 License:             BSD3
 License-file:        LICENSE
 Author:              Michael Snoyman
 Maintainer:          michael@snoyman.com
 Category:            Distribution
 Build-type:          Simple
-Cabal-version:       >=1.2
+Cabal-version:       >=1.6
+homepage:            https://github.com/
 
 
 Executable cabal-src-install
