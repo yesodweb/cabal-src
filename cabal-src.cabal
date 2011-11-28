@@ -19,3 +19,7 @@ Executable cabal-src-install
                      , tar
                      , directory
                      , process
+
+source-repository head
+  type:     git
+  location: git://github.com/yesodweb/cabal-src.git

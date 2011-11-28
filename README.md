@@ -50,3 +50,9 @@ automatically.
 This software should be considered alpha. We'll likely be using it for all
 Yesod development going forward, so I expect that alpha to be upgraded to beta
 and finally production quality in short order. All feedback is welcome!
+
+## Usage
+
+Simply replace a call to "cabal install" with a call to "cabal-src-install".
+If you would like to only install the source tarball without actually
+installing the binary package, run it with "cabal-src-install --src-only".

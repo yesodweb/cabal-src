@@ -19,10 +19,12 @@ rawSystem' a b = do
 main :: IO ()
 main = do
     args <- getArgs
-    rawSystem' "cabal" $ "install" : args
+    unless (args == ["--src-only"]) $ rawSystem' "cabal" $ "install" : args
     putStrLn "Installing source package"
-    getDirectoryContents "dist" >>= mapM_ (\fp ->
-        when (".tar.gz" `isSuffixOf` fp) $ removeFile $ "dist/" ++ fp)
+    distExists <- doesDirectoryExist "dist"
+    when distExists $
+        getDirectoryContents "dist" >>= mapM_ (\fp ->
+            when (".tar.gz" `isSuffixOf` fp) $ removeFile $ "dist/" ++ fp)
     rawSystem' "cabal" ["sdist"]
     files <- getDirectoryContents "dist"
     case filter (".tar.gz" `isSuffixOf`) files of
