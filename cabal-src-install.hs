@@ -61,11 +61,15 @@ addToDB name ver = do
     createDirectoryIfMissing True dir
     let filename = concat [name, "-", ver, ".tar.gz"]
     copyFile ("dist/" ++ filename) (dir ++ filename)
-    fixConfig $ cabal ++ "/config"
+    fixConfig pd $ cabal ++ "/config"
 
-fixConfig fn = do
-    ls <- lines <$> readFile fn
-    let s = "remote-repo: cabal-src:http://www.haskell.org/"
+fixConfig pd fn = do
+    ls' <- lines <$> readFile fn
+    let oldLines =
+            [ "remote-repo: cabal-src:http://www.haskell.org/"
+            ]
+    let s = "local-repo: " ++ pd
+    let ls = filter (not . flip elem oldLines) ls'
     unless (s `elem` ls) $ writeFile fn $ unlines $ addRepo s ls
 
 addRepo s [] = [s]

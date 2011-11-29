@@ -1,5 +1,5 @@
 Name:                cabal-src
-Version:             0.1
+Version:             0.2
 Synopsis:            Alternative install procedure to avoid the diamond dependency issue.
 Description:         Please see the README.md file on Github for more information: <https://github.com/yesodweb/cabal-src/blob/master/README.md>.
 License:             BSD3
