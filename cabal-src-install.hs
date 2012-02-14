@@ -10,6 +10,7 @@ import Data.Monoid (mempty)
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Lazy as L
 import Control.Applicative ((<$>))
+import Control.Exception (throw)
 
 rawSystem' :: String -> [String] -> IO ()
 rawSystem' a b = do
@@ -47,7 +48,7 @@ addToDB name ver = do
     e <- doesFileExist tb
     entries <-
         if e
-            then Tar.foldEntries (:) [] error . Tar.read . L.fromChunks . return
+            then Tar.foldEntries (:) [] throw . Tar.read . L.fromChunks . return
                 <$> S.readFile tb
             else return []
     cabalLBS <- L.readFile $ name ++ ".cabal"
