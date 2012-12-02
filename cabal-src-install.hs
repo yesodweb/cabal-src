@@ -1,7 +1,7 @@
-import System.Process (rawSystem)
+import System.Process (runProcess, waitForProcess)
 import System.Environment (getArgs)
 import System.Exit (ExitCode (ExitSuccess), exitWith)
-import Control.Monad (unless, when)
+import Control.Monad (unless, when, forM_)
 import System.Directory
 import Data.List (isSuffixOf, isPrefixOf)
 import qualified Codec.Archive.Tar as Tar
@@ -11,23 +11,40 @@ import qualified Data.ByteString as S
 import qualified Data.ByteString.Lazy as L
 import Control.Applicative ((<$>))
 import Control.Exception (throw)
+import System.FilePath ((</>))
 
-rawSystem' :: String -> [String] -> IO ()
-rawSystem' a b = do
-    ec <- rawSystem a b
+rawSystem' :: String -> [String] -> FilePath -> IO ()
+rawSystem' a b wdir = do
+    ph <- runProcess a b (Just wdir) Nothing Nothing Nothing Nothing
+    ec <- waitForProcess ph
     unless (ec == ExitSuccess) $ exitWith ec
 
 main :: IO ()
 main = do
     args <- getArgs
-    unless (args == ["--src-only"]) $ rawSystem' "cabal" $ "install" : args
-    putStrLn "Installing source package"
-    distExists <- doesDirectoryExist "dist"
+    let isSrcOnly = args == ["--src-only"]
+    unless isSrcOnly $ rawSystem' "cabal" ("install" : args) "."
+    hasSources <- doesFileExist "sources.txt"
+    if hasSources
+        then do
+            ls <- fmap lines $ readFile "sources.txt"
+            forM_ ls $ \l -> do
+                exists <- doesDirectoryExist l
+                when exists $ do
+                    files <- getDirectoryContents l
+                    when (any (".cabal" `isSuffixOf`) files) $ installSrc l
+        else installSrc "."
+
+installSrc :: FilePath -> IO ()
+installSrc root = do
+    putStrLn $ "Installing source package: " ++ root
+    let dist = root </> "dist"
+    distExists <- doesDirectoryExist dist
     when distExists $
-        getDirectoryContents "dist" >>= mapM_ (\fp ->
-            when (".tar.gz" `isSuffixOf` fp) $ removeFile $ "dist/" ++ fp)
-    rawSystem' "cabal" ["sdist"]
-    files <- getDirectoryContents "dist"
+        getDirectoryContents dist >>= mapM_ (\fp ->
+            when (".tar.gz" `isSuffixOf` fp) $ removeFile $ dist </> fp)
+    rawSystem' "cabal" ["sdist"] root
+    files <- getDirectoryContents dist
     case filter (".tar.gz" `isSuffixOf`) files of
         [x] -> do
             let y = drop 1 $ dropWhile (/= '.')
@@ -36,11 +53,11 @@ main = do
             let (ver', name') = break (== '-') y
             let ver = reverse ver'
             let name = reverse $ drop 1 name'
-            addToDB name ver
+            addToDB root dist name ver
         [] -> error "Missing tarball"
         _ -> error "Too many tarballs"
 
-addToDB name ver = do
+addToDB root dist name ver = do
     cabal <- getAppUserDataDirectory "cabal"
     let pd = cabal ++ "/packages/cabal-src/"
     createDirectoryIfMissing True pd
@@ -51,7 +68,7 @@ addToDB name ver = do
             then Tar.foldEntries (:) [] throw . Tar.read . L.fromChunks . return
                 <$> S.readFile tb
             else return []
-    cabalLBS <- L.readFile $ name ++ ".cabal"
+    cabalLBS <- L.readFile $ root </> name ++ ".cabal"
     Right tarPath <- return $ TE.toTarPath False $ concat
         [name, "/", ver, "/", name, "-", ver, ".cabal"]
     let entry = TE.fileEntry tarPath cabalLBS
@@ -61,7 +78,7 @@ addToDB name ver = do
     let dir = pd ++ concat [name, "/", ver, "/"]
     createDirectoryIfMissing True dir
     let filename = concat [name, "-", ver, ".tar.gz"]
-    copyFile ("dist/" ++ filename) (dir ++ filename)
+    copyFile (dist </> filename) (dir ++ filename)
     fixConfig pd $ cabal ++ "/config"
 
 fixConfig pd fn = do
