@@ -9,7 +9,7 @@ Maintainer:          michael@snoyman.com
 Category:            Distribution
 Build-type:          Simple
 Cabal-version:       >=1.6
-homepage:            https://github.com/
+homepage:            https://github.com/yesodweb/cabal-src
 
 
 Executable cabal-src-install
