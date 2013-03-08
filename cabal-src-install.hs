@@ -3,7 +3,7 @@ import System.Environment (getArgs)
 import System.Exit (ExitCode (ExitSuccess), exitWith)
 import Control.Monad (unless, when, forM_)
 import System.Directory
-import Data.List (isSuffixOf, isPrefixOf)
+import Data.List (isSuffixOf, isPrefixOf, find)
 import qualified Codec.Archive.Tar as Tar
 import qualified Codec.Archive.Tar.Entry as TE
 import Data.Monoid (mempty)
@@ -22,7 +22,10 @@ rawSystem' a b wdir = do
 main :: IO ()
 main = do
     args <- getArgs
-    let isSrcOnly = args == ["--src-only"]
+    let isSrcOnly = "--src-only" `elem` args
+        buildDir = case find ("--builddir=" `isPrefixOf`) args of
+                       Nothing -> "dist"
+                       Just b -> drop 11 b
     unless isSrcOnly $ rawSystem' "cabal" ("install" : args) "."
     hasSources <- doesFileExist "sources.txt"
     if hasSources
@@ -32,13 +35,14 @@ main = do
                 exists <- doesDirectoryExist l
                 when exists $ do
                     files <- getDirectoryContents l
-                    when (any (".cabal" `isSuffixOf`) files) $ installSrc l
-        else installSrc "."
+                    when (any (".cabal" `isSuffixOf`) files) $
+                        installSrc l buildDir
+        else installSrc "." buildDir
 
-installSrc :: FilePath -> IO ()
-installSrc root = do
+installSrc :: FilePath -> FilePath -> IO ()
+installSrc root buildDir = do
     putStrLn $ "Installing source package: " ++ root
-    let dist = root </> "dist"
+    let dist = root </> buildDir
     distExists <- doesDirectoryExist dist
     when distExists $
         getDirectoryContents dist >>= mapM_ (\fp ->
