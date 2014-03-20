@@ -56,3 +56,15 @@ and finally production quality in short order. All feedback is welcome!
 Simply replace a call to "cabal install" with a call to "cabal-src-install".
 If you would like to only install the source tarball without actually
 installing the binary package, run it with "cabal-src-install --src-only".
+
+## mega-sdist
+
+This package now also includes the mega-sdist util, which handles uploading to
+Hackage from mega repos.
+
+Compares local code against version on Hackage. Accepts the following options:
+
+* __--gittag__: Automatically tag as well.
+* __--test__: Automatically run cabal tests
+
+Uses sources.txt to determine which packages to build.

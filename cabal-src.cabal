@@ -1,5 +1,5 @@
 Name:                cabal-src
-Version:             0.2.1
+Version:             0.2.2
 Synopsis:            Alternative install procedure to avoid the diamond dependency issue.
 Description:         Please see the README.md file on Github for more information: <https://github.com/yesodweb/cabal-src/blob/master/README.md>.
 License:             BSD3
@@ -20,6 +20,24 @@ Executable cabal-src-install
                      , directory
                      , process
                      , filepath
+
+Executable mega-sdist
+  Main-is:             mega-sdist.hs
+  Build-depends:       base             >= 4              && < 5
+                     , shelly           >= 1.3.1
+                     , conduit          >= 0.5
+                     , zlib-conduit     >= 0.5
+                     , http-conduit     >= 1.5
+                     , system-filepath  >= 0.4            && < 0.5
+                     , system-fileio    >= 0.3            && < 0.4
+                     , http-types
+                     , transformers
+                     , tar
+                     , bytestring
+                     , containers
+                     , text
+                     , network
+                     , directory
 
 source-repository head
   type:     git
