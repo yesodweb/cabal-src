@@ -23,6 +23,7 @@ import Control.Monad.IO.Class (liftIO)
 import Shelly hiding ((</>))
 import Data.Maybe (mapMaybe, fromMaybe)
 import Network (withSocketsDo)
+import Control.Monad.Trans.Resource (runResourceT)
 
 debug :: String -> IO ()
 #ifdef DEBUG
@@ -139,7 +140,7 @@ go m fp = do
                 | fh -> handleFile localFileHackage NoChanges
                 | otherwise -> do
                     reqH <- getUrlHackage package
-                    resH <- C.runResourceT $ httpLbs reqH
+                    resH <- runResourceT $ httpLbs reqH
 #if MIN_VERSION_http_conduit(1, 9, 0)
                         { checkStatus = \_ _ _ -> Nothing
 #else
@@ -183,7 +184,7 @@ compareTGZ a b = {- FIXME catcher $ -} do
     -- catcher = handle (\SomeException{} -> debug (show ("compareTGZ" :: String, a, b)) >> return True)
     getContents fp = do
         lbs <- L.readFile (encodeString fp)
-        ebss <- try $ C.runResourceT $ CL.sourceList (L.toChunks lbs) C.$$ ungzip C.=$ CL.consume
+        ebss <- try $ runResourceT $ CL.sourceList (L.toChunks lbs) C.$$ ungzip C.=$ CL.consume
         case ebss of
             Left (e :: SomeException) -> do
                 putStrLn $ concat
