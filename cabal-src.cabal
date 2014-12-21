@@ -1,5 +1,5 @@
 Name:                cabal-src
-Version:             0.2.3
+Version:             0.2.4
 Synopsis:            Alternative install procedure to avoid the diamond dependency issue.
 Description:         Please see the README.md file on Github for more information: <https://github.com/yesodweb/cabal-src/blob/master/README.md>.
 License:             BSD3
@@ -10,7 +10,7 @@ Category:            Distribution
 Build-type:          Simple
 Cabal-version:       >=1.6
 homepage:            https://github.com/yesodweb/cabal-src
-
+extra-source-files:  README.md ChangeLog.md
 
 Executable cabal-src-install
   Main-is:             cabal-src-install.hs
@@ -39,6 +39,15 @@ Executable mega-sdist
                      , directory
                      , conduit-extra
                      , resourcet
+
+Executable hackage-docs
+  Main-is:             hackage-docs.hs
+  Build-depends:       base
+                     , http-client
+                     , http-client-tls
+                     , temporary
+                     , classy-prelude-conduit
+                     , Cabal
 
 source-repository head
   type:     git
