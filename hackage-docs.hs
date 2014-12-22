@@ -10,6 +10,7 @@ import System.IO.Temp
 import Network.HTTP.Client
 import Network.HTTP.Client.MultipartFormData
 import Network.HTTP.Client.TLS
+import Filesystem (isDirectory)
 
 main :: IO ()
 main = withManager tlsManagerSettings $ \man -> do
@@ -19,8 +20,22 @@ main = withManager tlsManagerSettings $ \man -> do
         case words $ decodeUtf8 rawCreds of
             [x, y] -> return (encodeUtf8 x, encodeUtf8 y)
             _ -> error "/hackage-creds didn't look like how I wanted"
+
+    whenM (isDirectory "tarballs") $ runResourceT
+        $ sourceDirectory "tarballs"
+       $$ mapM_C (liftIO . uploadTarball username password man)
+
     srcsRaw <- readFile "sources.txt" `catchIO` \_ -> return "."
     forM_ (lines $ decodeUtf8 srcsRaw) (processDir username password man . fpFromText)
+
+uploadTarball :: ByteString -> ByteString -> Manager -> FilePath -> IO ()
+uploadTarball username password man fp = do
+    let formData =
+            [ partFile "package" $ fpToString fp
+            ]
+    req1 <- formDataBody formData "http://hackage.haskell.org/packages/"
+    let req2 = applyBasicAuth username password req1
+    tryAny (httpLbs req2 man) >>= print
 
 terror :: Text -> a
 terror = error . unpack
