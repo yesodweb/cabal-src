@@ -48,6 +48,7 @@ Executable hackage-docs
                      , temporary
                      , classy-prelude-conduit
                      , Cabal
+                     , streaming-commons >= 0.1.7
 
 source-repository head
   type:     git
