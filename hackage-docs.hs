@@ -33,7 +33,7 @@ uploadTarball username password man fp = do
     let formData =
             [ partFile "package" $ fpToString fp
             ]
-    req1 <- formDataBody formData "http://hackage.haskell.org/packages/"
+    req1 <- formDataBody formData "https://hackage.haskell.org/packages/"
     let req2 = applyBasicAuth username password req1
     tryAny (httpLbs req2 man) >>= print
 
