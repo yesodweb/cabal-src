@@ -1,3 +1,7 @@
+## 0.3.0
+
+* Got rid of hackage-docs (use `stackage-upload` instead)
+
 ## 0.2.5.1
 
 * hackage-docs uses HTTPS for uploads
