@@ -40,8 +40,17 @@ getUrlHackage :: Package
 #endif
 getUrlHackage (Package a b) = do
     debug url
+#if MIN_VERSION_http_conduit(2, 2, 0)
+    req <- parseRequest url
+#else
     req <- parseUrl url
-    return req { responseTimeout = Nothing }
+#endif
+    return req
+#if MIN_VERSION_http_conduit(2, 2, 0)
+        { responseTimeout = responseTimeoutNone }
+#else
+        { responseTimeout = Nothing }
+#endif
   where
     url = concat
         [ "http://hackage.haskell.org/packages/archive/"
@@ -141,12 +150,15 @@ go m fp = do
                 | otherwise -> do
                     reqH <- getUrlHackage package
                     resH <- runResourceT $ httpLbs reqH
+#if !MIN_VERSION_http_conduit(2, 2, 0)
 #if MIN_VERSION_http_conduit(1, 9, 0)
                         { checkStatus = \_ _ _ -> Nothing
 #else
                         { checkStatus = \_ _ -> Nothing
 #endif
-                        } m
+                        }
+#endif
+                        m
                     case () of
                         ()
                             | responseStatus resH == status404 || L.length (responseBody resH) == 0 -> do

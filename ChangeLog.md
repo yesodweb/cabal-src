@@ -1,3 +1,7 @@
+## 0.3.0.2
+
+* http-client 0.5
+
 ## 0.3.0
 
 * Got rid of hackage-docs (use `stackage-upload` instead)
